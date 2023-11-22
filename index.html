@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="styles.css">
+	<title>Game of Life</title>
+</head>
+
+<body>
+	<h1>Conway's Game of Life</h1>
+	<div class="container">
+		<div class="panel">
+			<h2>Run game</h2>
+			<button id="populate">Randomly populate</button>
+			<button id="start">Start game</button>
+			<button id="stop">Stop game</button>
+			<h2>Settings</h2>
+			<h3>Canvas size</h3>
+			<input id="width" type="text" placeholder="width">
+			<input id="height" type="text" placeholder="height">
+			<button id="resizeCanvas">Resize canvas</button>
+			<input id="cell" type="text" placeholder="cell width">
+			<button id="resizeCell">Resize cell</button>
+		</div>
+		<div>
+			<p>New generation creation time: 250 мс.</p>
+			<p id="message"></p>
+			<div>
+				<canvas id="game-container" width="600" height="600"></canvas>
+			</div>
+		</div>
+	</div>
+	<script src="script.js"></script>
+</body>
+
+</html>
