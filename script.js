@@ -1,3 +1,7 @@
+import init from "./compute_grid/pkg/compute_grid.js";
+await init();
+import { compute_next } from "./compute_grid/pkg/compute_grid.js";
+
 class GameOfLife {
 	grid;
 	nextGrid;
@@ -101,7 +105,7 @@ class GameOfLife {
 	}
 
 	createEmptyGrid(rows, cols) {
-		return Array.from({ length: rows }, () => Array(cols).fill(false));
+		return Array.from({ length: rows }, () => Array(cols).fill(0));
 	}
 
 	drawCanvasGridLines() {
@@ -135,7 +139,7 @@ class GameOfLife {
 				let x = j * this.cellSize;
 				let y = i * this.cellSize;
 
-				if (this.grid[i][j] === true) {
+				if (this.grid[i][j] === 1) {
 					this.ctx.beginPath();
 					this.ctx.rect(y, x, this.cellSize, this.cellSize);
 					this.ctx.fillStyle = 'black';
@@ -150,7 +154,7 @@ class GameOfLife {
 		this.gameRunning = false;
 		this.message.textContent = '';
 		this.grid = this.grid.map((row) => {
-			return row.map(() => (Math.random() > 0.5 ? true : false));
+			return row.map(() => (Math.random() > 0.5 ? 1 : 0));
 		});
 		this.draw();
 	}
@@ -180,102 +184,24 @@ class GameOfLife {
 	}
 
 	computeNext(grid) {
-		const nextGrid = this.createEmptyGrid(this.rows, this.cols);
-		const newChangedCells = new Set();
-		const visitedCells = new Set();
-
-		// Iterate over all cells in the grid for the first iteration
-		if (this.changedCells.size === 0) {
-			for (let i = 0; i < this.rows; i++) {
-				for (let j = 0; j < this.cols; j++) {
-					const state = grid[i][j];
-					const neighbors = this.countNeighbors(grid, i, j);
-
-					if (state === false && neighbors === 3) {
-						nextGrid[i][j] = true;
-						newChangedCells.add({ row: i, col: j });
-					} else if (state === true && (neighbors < 2 || neighbors > 3)) {
-						nextGrid[i][j] = false;
-						newChangedCells.add({ row: i, col: j });
-					} else {
-						nextGrid[i][j] = state;
-					}
-				}
-			}
-		} else {
-			// Iterate over changed cells from the previous iteration
-			for (const { row, col } of this.changedCells) {
-				if (!visitedCells.has(this.hashCell({ row, col }))) {
-					const neighbors = this.countNeighbors(grid, row, col);
-					const currentState = grid[row][col];
-
-					visitedCells.add(this.hashCell({ row, col }));
-
-					if (currentState === false && neighbors === 3) {
-						nextGrid[row][col] = true;
-						newChangedCells.add({ row, col });
-					} else if (
-						currentState === true &&
-						(neighbors < 2 || neighbors > 3)
-					) {
-						nextGrid[row][col] = false;
-						newChangedCells.add({ row, col });
-					} else {
-						nextGrid[row][col] = currentState;
-					}
-				}
-
-				// Only reevaluate neighbors of the changed cell
-				for (let i = -1; i < 2; i++) {
-					for (let j = -1; j < 2; j++) {
-						const newRow = (row + i + this.rows) % this.rows;
-						const newCol = (col + j + this.cols) % this.cols;
-						const neighborCell = { row: newRow, col: newCol };
-
-						if (!visitedCells.has(this.hashCell(neighborCell))) {
-							visitedCells.add(this.hashCell(neighborCell));
-
-							const neighbors = this.countNeighbors(grid, newRow, newCol);
-							const currentState = grid[newRow][newCol];
-
-							if (currentState === false && neighbors === 3) {
-								nextGrid[newRow][newCol] = true;
-								newChangedCells.add(neighborCell);
-							} else if (
-								currentState === true &&
-								(neighbors < 2 || neighbors > 3)
-							) {
-								nextGrid[newRow][newCol] = false;
-								newChangedCells.add(neighborCell);
-							} else {
-								nextGrid[newRow][newCol] = currentState;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		this.changedCells = newChangedCells;
-
-		return nextGrid;
+		return compute_next(grid)
 	}
 
-	countNeighbors(grid, y, x) {
-		let sum = 0;
+	// countNeighbors(grid, y, x) {
+	// 	let sum = 0;
 
-		for (let i = -1; i < 2; i++) {
-			for (let j = -1; j < 2; j++) {
-				const row = (y + i + this.rows) % this.rows;
-				const col = (x + j + this.cols) % this.cols;
-				sum += grid[row][col] ? 1 : 0;
-			}
-		}
+	// 	for (let i = -1; i < 2; i++) {
+	// 		for (let j = -1; j < 2; j++) {
+	// 			const row = (y + i + this.rows) % this.rows;
+	// 			const col = (x + j + this.cols) % this.cols;
+	// 			sum += grid[row][col] ? 1 : 0;
+	// 		}
+	// 	}
 
-		sum = sum - (grid[y][x] ? 1 : 0);
+	// 	sum = sum - (grid[y][x] ? 1 : 0);
 
-		return sum;
-	}
+	// 	return sum;
+	// }
 
 	changeCellStateClick(event) {
 		this.message.textContent = '';
